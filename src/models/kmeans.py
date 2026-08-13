@@ -30,6 +30,9 @@ class KMeans:
         self.inertia_: float | None = None
         self.n_iterations_: int | None = None
 
+        self.converged_: bool = False
+        self.centroid_shift_history_: list[float] = []
+
     def fit(self, X: np.ndarray) -> KMeans:
         X = self._validate_input(X)
 
@@ -45,6 +48,12 @@ class KMeans:
             rng,
         )
 
+        self.labels_ = None
+        self.inertia_ = None
+        self.n_iterations_ = None
+        self.converged_ = False
+        self.centroid_shift_history_ = []
+
         for iteration in range(1, self.max_iterations + 1):
             labels = self._assign_clusters(X)
 
@@ -59,14 +68,24 @@ class KMeans:
                 axis=1,
             )
 
+            max_centroid_shift = float(
+                np.max(centroid_shift)
+            )
+
+            self.centroid_shift_history_.append(
+                max_centroid_shift
+            )
+
             self.centroids_ = new_centroids
             self.labels_ = labels
             self.n_iterations_ = iteration
 
-            if np.all(centroid_shift <= self.tolerance):
+            if max_centroid_shift <= self.tolerance:
+                self.converged_ = True
                 break
 
         self.labels_ = self._assign_clusters(X)
+
         self.inertia_ = self._calculate_inertia(
             X,
             self.labels_,
@@ -116,7 +135,8 @@ class KMeans:
         assert self.centroids_ is not None
 
         distances = np.linalg.norm(
-            X[:, np.newaxis, :] - self.centroids_[np.newaxis, :, :],
+            X[:, np.newaxis, :]
+            - self.centroids_[np.newaxis, :, :],
             axis=2,
         )
 
