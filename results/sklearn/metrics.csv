@@ -1,0 +1,2 @@
+implementation,k,best_seed,iterations,inertia,silhouette,family_ari,family_nmi,custom_vs_sklearn_ari
+scikit-learn,3,1,5,94587.59825525191,0.35645091270652085,0.402222982562314,0.3856266535956846,1.0
